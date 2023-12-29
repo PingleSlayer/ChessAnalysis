@@ -51,3 +51,34 @@ def move_info(node, write=False):
             promotion_piece = None
 
     return uci, moved_piece, captured_piece, promotion_piece
+
+
+def move_score(node, write=False, engine_depth=None, engine_time=0.1):
+    if node.parent == None:
+        return None
+    if "Move score: " in node.comment:
+        return float(node.comment.split("Move score: [")[1].split("]")[0])
+    else:
+        if "Eval: " not in node.parent.comment:
+            og_eval = evaluation(node.parent, write=write, engine_depth=engine_depth, engine_time=engine_time)
+        else:
+            og_eval = float(node.parent.comment.split("Eval: [")[1].split("]")[0])
+        if "Eval: " not in node.comment:
+            new_eval = evaluation(node, write=write, engine_depth=engine_depth, engine_time=engine_time)
+        else:
+            new_eval = float(node.comment.split("Eval: [")[1].split("]")[0])
+
+        if node.board().turn == chess.BLACK:
+            move_score = new_eval - og_eval
+        else:
+            move_score = og_eval - new_eval
+
+        # Add move score to the comment for the node
+        if write:
+            if node.comment:
+                node.comment += f', Move score: [{f"{float(move_score):.2f}"}]'
+            else:
+                node.comment = f'Move score: [{f"{float(move_score):.2f}"}]'
+
+        return move_score
+
