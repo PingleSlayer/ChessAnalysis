@@ -94,10 +94,10 @@ def move_tag(node, write=False, engine_depth=None, engine_time=0.1):
         new_move_score = move_score(node, write=write, engine_depth=engine_depth, engine_time=engine_time)
     
         # Check for a Book move
-        if position_name(node, write=write):
+        if position_name(node, write=write) != "Not Theory":
             tag = "Book"
         # Check for a Forced move
-        elif len(list(node.board().legal_moves)) == 1:
+        elif len(list(node.parent.board().legal_moves)) == 1:
             tag = "Forced"
         # Check for a Miss
         elif og_move_score is not None and og_move_score <= -1.5 and new_move_score <= -1.5:
