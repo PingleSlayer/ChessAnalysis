@@ -82,3 +82,60 @@ def move_score(node, write=False, engine_depth=None, engine_time=0.1):
 
         return move_score
 
+
+def move_tag(node, write=False, engine_depth=None, engine_time=0.1):
+    if node.parent == None:
+        return None
+    if "Move tag: " in node.comment:
+        return node.comment.split("Tag: [")[1].split("]")[0]
+    else:
+        eval = evaluation(node, write=write, engine_depth=engine_depth, engine_time=engine_time)
+        og_move_score = move_score(node.parent, write=write, engine_depth=engine_depth, engine_time=engine_time)
+        new_move_score = move_score(node, write=write, engine_depth=engine_depth, engine_time=engine_time)
+    
+        # Check for a Book move
+        if position_name(node, write=write):
+            tag = "Book"
+        # Check for a Forced move
+        elif len(list(node.board().legal_moves)) == 1:
+            tag = "Forced"
+        # Check for a Miss
+        elif og_move_score is not None and og_move_score <= -1.5 and new_move_score <= -1.5:
+            tag = "Miss"
+        elif new_move_score >= 0:
+            tag = "Best"
+        elif new_move_score >= -0.1:
+            tag = "Excellent"
+        elif new_move_score >= -0.25:
+            tag = "Nice"
+        elif new_move_score >= -0.5 and eval * (1 if node.board().turn == chess.BLACK else -1) <= 0.5:
+            tag = "Good"
+        elif new_move_score >= -1 and eval * (1 if node.board().turn == chess.BLACK else -1) <= 0.5:
+            tag = "Ok"
+        elif new_move_score >= -2.5 and eval * (1 if node.board().turn == chess.BLACK else -1) <= 0.5:
+            tag = "Questionable"
+        elif eval * (1 if node.board().turn == chess.BLACK else -1) <= 0.5:
+            tag = "Dubious"
+        elif new_move_score >= -0.5:
+            tag = "Decent"
+        elif new_move_score >= -1:
+            tag = "Inaccurate"
+        elif new_move_score >= -2:
+            tag = "Wrong"
+        elif new_move_score >= -3:
+            tag = "Mistake"
+        elif new_move_score >= -5:
+            tag = "Blunder"
+        elif new_move_score >= -9:
+            tag = "Disaster"
+        else:
+            tag = "Catastrophe"
+
+        # Add move classification to the comment for the node
+        if write:
+            if node.comment:
+                node.comment += f', Tag: [{tag}]'
+            else:
+                node.comment = f'Tag: [{tag}]'
+
+    return tag
