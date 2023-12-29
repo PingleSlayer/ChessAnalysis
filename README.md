@@ -11,3 +11,4 @@ Welcome to the Chess Game Analyzer project! This open-source project aims to pro
 
 ## Contributing
 We welcome contributions/suggestions from the community! If you'd like to contribute to the project please do.
+(This is my first real GitHub project so if I am doing something wrong let me know!)
