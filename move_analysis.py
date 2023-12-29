@@ -104,14 +104,16 @@ def move_tag(node, write=False, engine_depth=None, engine_time=0.1):
             tag = "Miss"
         elif new_move_score >= 0:
             tag = "Best"
-        elif new_move_score >= -0.1:
+        elif new_move_score >= -0.05:
             tag = "Excellent"
-        elif new_move_score >= -0.25:
+        elif new_move_score >= -0.1:
             tag = "Nice"
-        elif new_move_score >= -0.5 and eval * (1 if node.board().turn == chess.BLACK else -1) <= -0.5:
+        elif new_move_score >= -0.25:
             tag = "Good"
-        elif new_move_score >= -1 and eval * (1 if node.board().turn == chess.BLACK else -1) <= -0.5:
+        elif new_move_score >= -0.5 and eval * (1 if node.board().turn == chess.BLACK else -1) <= -0.5:
             tag = "Ok"
+        elif new_move_score >= -1 and eval * (1 if node.board().turn == chess.BLACK else -1) <= -0.5:
+            tag = "Inaccurate"
         elif new_move_score >= -2.5 and eval * (1 if node.board().turn == chess.BLACK else -1) <= -0.5:
             tag = "Questionable"
         elif eval * (1 if node.board().turn == chess.BLACK else -1) <= 0:
