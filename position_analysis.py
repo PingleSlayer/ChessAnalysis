@@ -2,6 +2,7 @@ import chess
 import chess.engine
 
 from helpfunctions import load_openings
+from options import ENGINE_NAME
 
 
 # Load the position dictionary
@@ -37,8 +38,8 @@ def evaluation(node, write=False, engine_depth=None, engine_time=0.1):
     if "Eval: " in node.comment:
         return node.comment.split("Eval: [")[1].split("]")[0]
     else:
-        stockfish_path = "Engine/stockfish.exe"
-        with chess.engine.SimpleEngine.popen_uci(stockfish_path) as engine:
+        engine_path = f"Engine/{ENGINE_NAME}"
+        with chess.engine.SimpleEngine.popen_uci(engine_path) as engine:
             # Calculate and add position evaluation to the comment
             if engine_depth:
                 result = engine.analyse(node.board(), chess.engine.Limit(depth=engine_depth))

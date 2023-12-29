@@ -1,0 +1,1 @@
+ENGINE_NAME = "stockfish.exe"
