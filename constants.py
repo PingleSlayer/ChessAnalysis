@@ -6,6 +6,7 @@ MOVE_TAG_BOUNDARIES = {
     "Winning": 0.5,  
     "Miss 1": -1.5,  
     "Miss 2": -1.5,  
+    "Best": 0,  
     "Excellent": -0.05,  
     "Good": -0.1, 
     "Decent": -0.25, 
