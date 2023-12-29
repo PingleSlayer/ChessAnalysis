@@ -7,7 +7,7 @@ def load_openings():
 
     # Iterate through each TSV file
     for tsv_file in tsv_files:
-        with open(f'Opening Positions/{tsv_file}', 'r', newline='') as file:
+        with open(f'Openings/{tsv_file}', 'r', newline='') as file:
             reader = csv.DictReader(file, delimiter='\t')
 
             # Iterate through each row in the TSV file
