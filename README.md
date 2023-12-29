@@ -17,3 +17,8 @@ We welcome contributions/suggestions from the community! If you'd like to contri
 ## To Do
 - Find optimal move tags and boundary conditions
 - Add tools for positional analysis, move analysis and game analysis
+
+## 
+- Using stockfish as engine
+- Using python-chess library
+- Using openings from chess-openings reposotory
