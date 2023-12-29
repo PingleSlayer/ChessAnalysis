@@ -16,18 +16,20 @@ def position_name(node, write=False):
         fen_parts = node.board().fen().rsplit(' ', 2)[:-2]
         fen_key = ' '.join(fen_parts)
 
-        # Initialize opening_name outside the if block
-        opening_name = None
-
         # Check if the current FEN is in the opening dictionary
+        opening_name = None
         if fen_key in position_dict:
             opening_name = position_dict[fen_key]
-            if write:
-                if node.comment:
-                    node.comment += f', Name: [{opening_name}]'
-                else:
-                    node.comment = f'Name: [{opening_name}]'
-                    
+        else:
+            opening_name = "Not Theory"
+        
+        # Add opening to the comment of the node
+        if write:
+            if node.comment:
+                node.comment += f', Name: [{opening_name}]'
+            else:
+                node.comment = f'Name: [{opening_name}]'     
+
         return opening_name
 
 
