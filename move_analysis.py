@@ -108,58 +108,58 @@ def move_tag(node, write=False, engine_depth=None, engine_time=0.1):
         elif og_move_score is not None and og_move_score <= MOVE_TAG_BOUNDARIES["MISS 1"] and new_move_score <= MOVE_TAG_BOUNDARIES["MISS 2"]:
             tag = "Miss"
         # Check for good move
-        elif new_move_score >= -0.25:
-            if new_move_score >= 0:
+        elif new_move_score >= MOVE_TAG_BOUNDARIES["Decent"]:
+            if new_move_score >= MOVE_TAG_BOUNDARIES["Best"]:
                 tag = "Best"
-            elif new_move_score >= -0.05:
+            elif new_move_score >= MOVE_TAG_BOUNDARIES["Excellent"]:
                 tag = "Excellent"
-            elif new_move_score >= -0.1:
+            elif new_move_score >= MOVE_TAG_BOUNDARIES["Good"]:
                 tag = "Good"
             else:
                 tag = "Decent"
         # Check for suboptimal winning move
         elif relative_eval >= MOVE_TAG_BOUNDARIES["Winning"]:
-            if new_move_score >= -0.5:
+            if new_move_score >= MOVE_TAG_BOUNDARIES["Safe"]:
                 tag = "Safe"
-            elif new_move_score >= -1:
+            elif new_move_score >= MOVE_TAG_BOUNDARIES["Suboptimal"]:
                 tag = "Suboptimal"
-            elif new_move_score >= -1.5:
+            elif new_move_score >= MOVE_TAG_BOUNDARIES["Inaccurate"]:
                 tag = "Inaccurate"
-            elif new_move_score >= -2:
+            elif new_move_score >= MOVE_TAG_BOUNDARIES["Ineffective"]:
                 tag = "Ineffective"
-            elif new_move_score >= -3:
+            elif new_move_score >= MOVE_TAG_BOUNDARIES["Dubious"]:
                 tag = "Dubious"
             else:
                 tag = "Blunder"
         # Check for suboptimal not losing move
         elif relative_eval >= -MOVE_TAG_BOUNDARIES["Winning"]:
-            if new_move_score >= -0.5:
+            if new_move_score >= MOVE_TAG_BOUNDARIES["Reasonable"]:
                 tag = "Reasonable"
-            elif new_move_score >= -1:
+            elif new_move_score >= MOVE_TAG_BOUNDARIES["Inconsistent"]:
                 tag = "Inconsistent"
-            elif new_move_score >= -1.5:
+            elif new_move_score >= MOVE_TAG_BOUNDARIES["Weak"]:
                 tag = "Weak"
-            elif new_move_score >= -2:
+            elif new_move_score >= MOVE_TAG_BOUNDARIES["Error"]:
                 tag = "Error"
-            elif new_move_score >= -3:
-                tag = "Dubious"
+            elif new_move_score >= MOVE_TAG_BOUNDARIES["Fumble"]:
+                tag = "Fumble"
             else:
                 tag = "Blunder"
         # Check for losing move
         else:
-            if new_move_score >= -0.5:
-                tag = "Defensible"
-            elif new_move_score >= -1:
-                tag = "Inaccurate"
-            elif new_move_score >= -1.5:
-                tag = "Risky"
-            elif new_move_score >= -2:
+            if new_move_score >= -MOVE_TAG_BOUNDARIES["Okay"]:
+                tag = "Okay"
+            elif new_move_score >= -MOVE_TAG_BOUNDARIES["Misstep"]:
+                tag = "Misstep"
+            elif new_move_score >= -MOVE_TAG_BOUNDARIES["Questionable"]:
                 tag = "Questionable"
-            elif new_move_score >= -3:
+            elif new_move_score >= -MOVE_TAG_BOUNDARIES["Subpar"]:
                 tag = "Subpar"
-            elif new_move_score >= -5:
+            elif new_move_score >= -MOVE_TAG_BOUNDARIES["Bad"]:
+                tag = "Bad"
+            elif new_move_score >= -MOVE_TAG_BOUNDARIES["Blunder"]:
                 tag = "Blunder"
-            elif new_move_score >= -9:
+            elif new_move_score >= -MOVE_TAG_BOUNDARIES["Disaster"]:
                 tag = "Disaster"
             else:
                 tag = "Catastrophe"
