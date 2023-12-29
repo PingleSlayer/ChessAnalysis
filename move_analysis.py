@@ -136,8 +136,8 @@ def move_tag(node, write=False, engine_depth=None, engine_time=0.1):
         # Add move classification to the comment for the node
         if write:
             if node.comment:
-                node.comment += f', Tag: [{tag}]'
+                node.comment += f', Move Tag: [{tag}]'
             else:
-                node.comment = f'Tag: [{tag}]'
+                node.comment = f'Move Tag: [{tag}]'
 
     return tag
