@@ -15,4 +15,5 @@ We welcome contributions/suggestions from the community! If you'd like to contri
 (This is my first real GitHub project so if I am doing something wrong let me know!)
 
 ## To Do
-
+- Find optimal move tags and boundary conditions
+- Add tools for positional analysis, move analysis and game analysis
