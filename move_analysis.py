@@ -1,11 +1,13 @@
 import chess
 
 from position_analysis import position_name, evaluation
+from constants import MOVE_TAG_BOUNDARIES
 
 
 def move_info(node, write=False):
     if node.parent == None:
         return None
+    # Get UCI
     if "UCI: "  in node.comment:
         uci = node.comment.split("UCI: [")[1].split("]")[0]
     else:
@@ -15,6 +17,7 @@ def move_info(node, write=False):
                 node.comment += f', UCI: [{f"{uci}"}]'
             else:
                 node.comment = f'UCI: [{f"{uci}"}]'
+    # Get piece
     if "Piece: " in node.comment:
         moved_piece = node.comment.split("Piece: [")[1].split("]")[0]
     else:
@@ -24,6 +27,7 @@ def move_info(node, write=False):
                 node.comment += f', Piece: [{f"{moved_piece}"}]'
             else:
                 node.comment = f'Piece: [{f"{moved_piece}"}]'
+    # Get captured piece
     if "Capture: " in node.comment:
         captured_piece = node.comment.split("Capture: [")[1].split("]")[0]
     else:
@@ -36,7 +40,7 @@ def move_info(node, write=False):
                     node.comment = f'Capture: [{f"{captured_piece}"}]'
         else:
             captured_piece = None
-        
+    # Get promotion piece
     if "Promotion: " in node.comment:
         promotion_piece = node.comment.split("Promotion: [")[1].split("]")[0]
     else:
@@ -90,48 +94,75 @@ def move_tag(node, write=False, engine_depth=None, engine_time=0.1):
         return node.comment.split("Tag: [")[1].split("]")[0]
     else:
         eval = evaluation(node, write=write, engine_depth=engine_depth, engine_time=engine_time)
+        relative_eval = eval * (1 if node.board().turn == chess.WHITE else -1)
         og_move_score = move_score(node.parent, write=write, engine_depth=engine_depth, engine_time=engine_time)
         new_move_score = move_score(node, write=write, engine_depth=engine_depth, engine_time=engine_time)
-    
-        # Check for a Book move
+
+        # Check for book move
         if position_name(node, write=write) != "Not Theory":
             tag = "Book"
-        # Check for a Forced move
+        # Check for forced move
         elif len(list(node.parent.board().legal_moves)) == 1:
             tag = "Forced"
-        # Check for a Miss
-        elif og_move_score is not None and og_move_score <= -1.5 and new_move_score <= -1.5:
+        # Check for miss
+        elif og_move_score is not None and og_move_score <= MOVE_TAG_BOUNDARIES["MISS 1"] and new_move_score <= MOVE_TAG_BOUNDARIES["MISS 2"]:
             tag = "Miss"
-        elif new_move_score >= 0:
-            tag = "Best"
-        elif new_move_score >= -0.05:
-            tag = "Excellent"
-        elif new_move_score >= -0.1:
-            tag = "Nice"
+        # Check for good move
         elif new_move_score >= -0.25:
-            tag = "Good"
-        elif new_move_score >= -0.5 and eval * (1 if node.board().turn == chess.BLACK else -1) <= -0.5:
-            tag = "Ok"
-        elif new_move_score >= -1 and eval * (1 if node.board().turn == chess.BLACK else -1) <= -0.5:
-            tag = "Inaccurate"
-        elif new_move_score >= -2.5 and eval * (1 if node.board().turn == chess.BLACK else -1) <= -0.5:
-            tag = "Questionable"
-        elif eval * (1 if node.board().turn == chess.BLACK else -1) <= 0:
-            tag = "Dubious"
-        elif new_move_score >= -0.5:
-            tag = "Decent"
-        elif new_move_score >= -1:
-            tag = "Inaccurate"
-        elif new_move_score >= -2:
-            tag = "Wrong"
-        elif new_move_score >= -3:
-            tag = "Mistake"
-        elif new_move_score >= -5:
-            tag = "Blunder"
-        elif new_move_score >= -9:
-            tag = "Disaster"
+            if new_move_score >= 0:
+                tag = "Best"
+            elif new_move_score >= -0.05:
+                tag = "Excellent"
+            elif new_move_score >= -0.1:
+                tag = "Good"
+            else:
+                tag = "Decent"
+        # Check for suboptimal winning move
+        elif relative_eval >= MOVE_TAG_BOUNDARIES["Winning"]:
+            if new_move_score >= -0.5:
+                tag = "Safe"
+            elif new_move_score >= -1:
+                tag = "Suboptimal"
+            elif new_move_score >= -1.5:
+                tag = "Inaccurate"
+            elif new_move_score >= -2:
+                tag = "Ineffective"
+            elif new_move_score >= -3:
+                tag = "Dubious"
+            else:
+                tag = "Blunder"
+        # Check for suboptimal not losing move
+        elif relative_eval >= -MOVE_TAG_BOUNDARIES["Winning"]:
+            if new_move_score >= -0.5:
+                tag = "Reasonable"
+            elif new_move_score >= -1:
+                tag = "Inconsistent"
+            elif new_move_score >= -1.5:
+                tag = "Weak"
+            elif new_move_score >= -2:
+                tag = "Error"
+            elif new_move_score >= -3:
+                tag = "Dubious"
+            else:
+                tag = "Blunder"
+        # Check for losing move
         else:
-            tag = "Catastrophe"
+            if new_move_score >= -0.5:
+                tag = "Defensible"
+            elif new_move_score >= -1:
+                tag = "Inaccurate"
+            elif new_move_score >= -1.5:
+                tag = "Risky"
+            elif new_move_score >= -2:
+                tag = "Questionable"
+            elif new_move_score >= -3:
+                tag = "Subpar"
+            elif new_move_score >= -5:
+                tag = "Blunder"
+            elif new_move_score >= -9:
+                tag = "Disaster"
+            else:
+                tag = "Catastrophe"
 
         # Add move classification to the comment for the node
         if write:
