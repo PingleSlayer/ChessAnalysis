@@ -29,3 +29,29 @@ def position_name(node, write=False):
                     node.comment = f'Name: [{opening_name}]'
                     
         return opening_name
+
+
+def evaluation(node, write=False, engine_depth=None, engine_time=0.1):
+    if "Eval: " in node.comment:
+        return node.comment.split("Eval: [")[1].split("]")[0]
+    else:
+        stockfish_path = "Engine/stockfish.exe"
+        with chess.engine.SimpleEngine.popen_uci(stockfish_path) as engine:
+            # Calculate and add position evaluation to the comment
+            if engine_depth:
+                result = engine.analyse(node.board(), chess.engine.Limit(depth=engine_depth))
+            else:
+                result = engine.analyse(node.board(), chess.engine.Limit(time=engine_time))
+            eval_score = result["score"].relative.score(mate_score=10000) / 100
+            if node.board().turn == chess.BLACK:
+                eval_score = -eval_score
+            eval_str = f"{float(eval_score):.2f}"
+
+            # Add eval to the comment for the node
+            if write:
+                if node.comment:
+                    node.comment += f', Eval: [{eval_str}]'
+                else:
+                    node.comment = f'Eval: [{eval_str}]'
+
+        return eval_score
