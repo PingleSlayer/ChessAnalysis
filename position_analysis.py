@@ -2,12 +2,7 @@ import chess
 import chess.engine
 
 from api import get_position_info
-from helpfunctions import load_openings
 from options import ENGINE_NAME
-
-
-# Load the position dictionary
-position_dict = load_openings() 
 
 
 def position_comment(node):
@@ -21,7 +16,6 @@ def position_comment(node):
         else:
             return None
     
-
 
 def position_name(node, write=False):
     if "ECO: " in node.comment and "Name: " in node.comment:
