@@ -18,6 +18,7 @@ We welcome contributions/suggestions from the community! If you'd like to contri
 - Properly test existing code
 - Find easy to understand, useful move tags and accompanying boundary conditions
 - Improve and add to game_accuracy
+- Check if move wins/sacrifices material
 - Use Lichess API for openings, endgame tablebase,...
 - Split game into opening, middlegame and endgame
 - Add tools for positional analysis like development, king safety, board control, pawn structure, attacking chances, threats,...
