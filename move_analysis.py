@@ -147,19 +147,19 @@ def move_tag(node, write=False, engine_depth=None, engine_time=0.1):
                 tag = "Blunder"
         # Check for losing move
         else:
-            if new_move_score >= -MOVE_TAG_BOUNDARIES["Okay"]:
+            if new_move_score >= MOVE_TAG_BOUNDARIES["Okay"]:
                 tag = "Okay"
-            elif new_move_score >= -MOVE_TAG_BOUNDARIES["Misstep"]:
+            elif new_move_score >= MOVE_TAG_BOUNDARIES["Misstep"]:
                 tag = "Misstep"
-            elif new_move_score >= -MOVE_TAG_BOUNDARIES["Questionable"]:
+            elif new_move_score >= MOVE_TAG_BOUNDARIES["Questionable"]:
                 tag = "Questionable"
-            elif new_move_score >= -MOVE_TAG_BOUNDARIES["Subpar"]:
+            elif new_move_score >= MOVE_TAG_BOUNDARIES["Subpar"]:
                 tag = "Subpar"
-            elif new_move_score >= -MOVE_TAG_BOUNDARIES["Bad"]:
+            elif new_move_score >= MOVE_TAG_BOUNDARIES["Bad"]:
                 tag = "Bad"
-            elif new_move_score >= -MOVE_TAG_BOUNDARIES["Blunder"]:
+            elif new_move_score >= MOVE_TAG_BOUNDARIES["Blunder"]:
                 tag = "Blunder"
-            elif new_move_score >= -MOVE_TAG_BOUNDARIES["Disaster"]:
+            elif new_move_score >= MOVE_TAG_BOUNDARIES["Disaster"]:
                 tag = "Disaster"
             else:
                 tag = "Catastrophe"
