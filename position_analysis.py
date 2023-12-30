@@ -35,7 +35,7 @@ def position_name(node, write=False):
         if fen_key in position_dict:
             opening_name = position_dict[fen_key]
         else:
-            opening_name = "Not Theory"
+            opening_name = "None"
         
         # Add opening to the comment of the node
         if write:
