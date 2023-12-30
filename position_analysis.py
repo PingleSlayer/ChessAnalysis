@@ -104,6 +104,8 @@ def position_evaluation(node, write=False, engine_depth=None, engine_time=0.1):
                     eval_score = 100
             else:
                 eval_score = get_evaluation(node.board(), engine_depth=engine_depth, engine_time=engine_time)
+        else:
+            eval_score = get_evaluation(node.board(), engine_depth=engine_depth, engine_time=engine_time)    
         eval_str = f"{float(eval_score):.2f}"
 
         # Add eval to the comment for the node
