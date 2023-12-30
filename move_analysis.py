@@ -1,6 +1,6 @@
 import chess
 
-from position_analysis import position_name, evaluation
+from position_analysis import position_name, position_evaluation
 from constants import MOVE_TAG_BOUNDARIES
 
 
@@ -31,7 +31,7 @@ def move_info(node, write=False):
     if "Capture: " in node.comment:
         captured_piece = node.comment.split("Capture: [")[1].split("]")[0]
     else:
-        if node.board().is_capture(node.move):
+        if node.parent.board().is_capture(node.move):
             captured_piece = chess.piece_name(node.parent.board().piece_at(node.move.to_square).piece_type)
             if write:
                 if node.comment:
@@ -64,11 +64,11 @@ def move_score(node, write=False, engine_depth=None, engine_time=0.1):
         return float(node.comment.split("Move score: [")[1].split("]")[0])
     else:
         if "Eval: " not in node.parent.comment:
-            og_eval = evaluation(node.parent, write=write, engine_depth=engine_depth, engine_time=engine_time)
+            og_eval = position_evaluation(node.parent, write=write, engine_depth=engine_depth, engine_time=engine_time)
         else:
             og_eval = float(node.parent.comment.split("Eval: [")[1].split("]")[0])
         if "Eval: " not in node.comment:
-            new_eval = evaluation(node, write=write, engine_depth=engine_depth, engine_time=engine_time)
+            new_eval = position_evaluation(node, write=write, engine_depth=engine_depth, engine_time=engine_time)
         else:
             new_eval = float(node.comment.split("Eval: [")[1].split("]")[0])
 
@@ -93,7 +93,7 @@ def move_tag(node, write=False, engine_depth=None, engine_time=0.1):
     if "Move tag: " in node.comment:
         return node.comment.split("Tag: [")[1].split("]")[0]
     else:
-        eval = evaluation(node, write=write, engine_depth=engine_depth, engine_time=engine_time)
+        eval = position_evaluation(node, write=write, engine_depth=engine_depth, engine_time=engine_time)
         relative_eval = eval * (1 if node.board().turn == chess.WHITE else -1)
         og_move_score = move_score(node.parent, write=write, engine_depth=engine_depth, engine_time=engine_time)
         new_move_score = move_score(node, write=write, engine_depth=engine_depth, engine_time=engine_time)
@@ -105,7 +105,7 @@ def move_tag(node, write=False, engine_depth=None, engine_time=0.1):
         elif len(list(node.parent.board().legal_moves)) == 1:
             tag = "Forced"
         # Check for miss
-        elif og_move_score is not None and og_move_score <= MOVE_TAG_BOUNDARIES["MISS 1"] and new_move_score <= MOVE_TAG_BOUNDARIES["MISS 2"]:
+        elif og_move_score is not None and og_move_score <= MOVE_TAG_BOUNDARIES["Miss 1"] and new_move_score <= MOVE_TAG_BOUNDARIES["Miss 2"]:
             tag = "Miss"
         # Check for good move
         elif new_move_score >= MOVE_TAG_BOUNDARIES["Decent"]:

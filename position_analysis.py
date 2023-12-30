@@ -9,6 +9,19 @@ from options import ENGINE_NAME
 position_dict = load_openings() 
 
 
+def position_comment(node):
+    if "Comment: " in node.comment:
+        return node.comment.split("Comment: [")[1].split("]")[0]
+    else:
+        if node.comment:
+            comment = node.comment
+        else:
+            comment = "None"
+        node.comment = f"Comment: [{comment}]"
+        return comment
+    
+
+
 def position_name(node, write=False):
     if "Name: " in node.comment:
         return node.comment.split("Name: [")[1].split("]")[0]
@@ -34,9 +47,9 @@ def position_name(node, write=False):
         return opening_name
 
 
-def evaluation(node, write=False, engine_depth=None, engine_time=0.1):
+def position_evaluation(node, write=False, engine_depth=None, engine_time=0.1):
     if "Eval: " in node.comment:
-        return node.comment.split("Eval: [")[1].split("]")[0]
+        return float(node.comment.split("Eval: [")[1].split("]")[0])
     else:
         engine_path = f"Engine/{ENGINE_NAME}"
         with chess.engine.SimpleEngine.popen_uci(engine_path) as engine:
