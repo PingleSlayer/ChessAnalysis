@@ -26,6 +26,6 @@ We welcome contributions/suggestions from the community! If you'd like to contri
 - Display for easy use maybe?
 
 ## Sources
-- Using stockfish as engine
+- Using stockfish
 - Using python-chess library
 - Using Lichess API
