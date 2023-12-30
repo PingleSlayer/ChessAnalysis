@@ -1,7 +1,7 @@
 # ChessAnalysis
 
 ## Introduction
-Welcome to the Chess Game Analyzer project! This open-source project aims to provide a free, versatile and extensible tool for analyzing chess games. Whether you're a chess enthusiast, a developer looking to contribute, or someone interested in understanding the intricacies of chess games, this project is designed to cater to your needs.
+Welcome to the ChessAnalysis project! This open-source project aims to provide a free, versatile and extensible tool for analyzing chess games. Whether you're a chess enthusiast, a developer looking to contribute, or someone interested in understanding the intricacies of chess games, this project is designed to cater to your needs.
 
 ## Features
 - PGN File Support: Easily import and analyze games from Portable Game Notation (PGN) files, a standard for representing chess games.
@@ -15,7 +15,6 @@ We welcome contributions/suggestions from the community! If you'd like to contri
 (This is my first real GitHub project so if I am doing something wrong let me know!)
 
 ## To Do
-- Fix problem in move_analysis.py -> move_info() -> no piece at to_square?
 - Properly test existing code
 - Find easy to understand, useful move tags and accompanying boundary conditions
 - Use Lichess API for openings, endgame tablebase,...
