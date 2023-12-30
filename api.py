@@ -31,7 +31,7 @@ def get_position_info(fen):
 
         return eco, opening, white_wins, draws, black_wins
     elif response.status_code == 429:
-        print("\nToo many requests -> Waiting 1 minute\n")
+        print("Too many requests -> Waiting 1 minute")
         time.sleep(60)
         return get_position_info(fen)
     else:

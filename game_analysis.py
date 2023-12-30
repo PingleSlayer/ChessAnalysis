@@ -76,4 +76,3 @@ def game_analysis(pgn_string, write=False, engine_depth=None, engine_time=0.1):
             node.comment = og_comments[i]
 
     return game
-
