@@ -11,8 +11,12 @@ def game_accuracy(game, write=False, engine_depth=None, engine_time=0.1):
     total_white_moves = 0
     total_black_move_score = 0
     total_black_moves = 0
+    
+    og_comments = []
     # Iterate through the moves in the game to calculate average move score
     for node in game.mainline():
+        if not write:
+            og_comments.append(node.comment)
         if node.board().turn == chess.BLACK:
             total_white_move_score += move_score(node, write=True, engine_depth=engine_depth, engine_time=engine_time)
             total_white_moves += 1
@@ -37,9 +41,8 @@ def game_accuracy(game, write=False, engine_depth=None, engine_time=0.1):
 
     # Delete from pgn        
     if not write:
-        for node in game.mainline():
-            og_comment = position_comment(node)
-            node.comment = og_comment
+        for i, node in enumerate(game.mainline()):
+            node.comment = og_comments[i]
 
     return avg_white_move_score, stdev_white_move_score, avg_black_move_score, stdev_black_move_score
 
@@ -47,12 +50,14 @@ def game_accuracy(game, write=False, engine_depth=None, engine_time=0.1):
 def game_analysis(pgn_string, write=False, engine_depth=None, engine_time=0.1):
     # Load the PGN
     game = chess.pgn.read_game(StringIO(pgn_string))
-
+    og_comments = []
     # Iterate through the moves in the game
     for node in game.mainline():
+        if not write:
+            og_comments.append(node.comment)
         # Add position information to the game object
         position_comment(node)
-        position_name(node, write=True)
+        print(position_name(node, write=True))
         position_evaluation(node, write=True, engine_depth=engine_depth, engine_time=engine_time)
 
         # Add move information to the game object
@@ -67,8 +72,8 @@ def game_analysis(pgn_string, write=False, engine_depth=None, engine_time=0.1):
     
     # Delete from pgn
     if not write:
-        for node in game.mainline():
-            og_comment = position_comment(node)
-            node.comment = og_comment
+        for i, node in enumerate(game.mainline()):
+            node.comment = og_comments[i]
 
     return game
+

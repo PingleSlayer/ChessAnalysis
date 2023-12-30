@@ -1,6 +1,7 @@
 import chess
 import chess.engine
 
+from api import get_position_info
 from helpfunctions import load_openings
 from options import ENGINE_NAME
 
@@ -15,36 +16,31 @@ def position_comment(node):
     else:
         if node.comment:
             comment = node.comment
+            node.comment = f"Comment: [{comment}]"
+            return comment
         else:
-            comment = "None"
-        node.comment = f"Comment: [{comment}]"
-        return comment
+            return None
     
 
 
 def position_name(node, write=False):
-    if "Name: " in node.comment:
-        return node.comment.split("Name: [")[1].split("]")[0]
+    if "ECO: " in node.comment and "Name: " in node.comment:
+        return node.comment.split("ECO: [")[1].split("]")[0], node.comment.split("Name: [")[1].split("]")[0]
     else:
-        # Get FEN without the last two integers
-        fen_parts = node.board().fen().rsplit(' ', 2)[:-2]
-        fen_key = ' '.join(fen_parts)
-
-        # Check if the current FEN is in the opening dictionary
-        opening_name = None
-        if fen_key in position_dict:
-            opening_name = position_dict[fen_key]
+        result = get_position_info(node.board().fen())
+        if result == None:
+            return None
         else:
-            opening_name = "None"
-        
+            eco, opening, _, _, _ = result
+
         # Add opening to the comment of the node
         if write:
             if node.comment:
-                node.comment += f', Name: [{opening_name}]'
+                node.comment += f', ECO: [{eco}], Name: [{opening}]'
             else:
-                node.comment = f'Name: [{opening_name}]'     
+                node.comment = f'ECO: [{eco}], Name: [{opening}]'     
 
-        return opening_name
+        return eco, opening
 
 
 def position_evaluation(node, write=False, engine_depth=None, engine_time=0.1):
