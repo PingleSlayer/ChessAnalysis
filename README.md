@@ -15,8 +15,9 @@ We welcome contributions/suggestions from the community! If you'd like to contri
 (This is my first real GitHub project so if I am doing something wrong let me know!)
 
 ## To Do
+- Fix problem in move_analysis.py -> move_info() -> problem with captured piece being NoneType
 - Find easy to understand, useful move tags and accompanying boundary conditions
-- Add tools for positional analysis like king safety, board control, pawn structure,...
+- Add tools for positional analysis like king safety, board control, pawn structure, attacking chances, threats,...
 - Add tools for move analysis like movetype (fork, pin,...), alternatives,...
 - Add tools for game analysis like accuracy, recommended areas of improvement,...
 - Display for easy use maybe?
@@ -24,4 +25,4 @@ We welcome contributions/suggestions from the community! If you'd like to contri
 ## Sources
 - Using stockfish as engine
 - Using python-chess library
-- Using openings from chess-openings reposotory
+- Using openings from chess-openings repository
