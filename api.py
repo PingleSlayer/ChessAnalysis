@@ -2,14 +2,11 @@ import requests
 import time
 
 
-# Endpoint URL
-masters_url = "https://explorer.lichess.ovh/masters"
-
-
 def get_position_info(fen):
     params = {"fen": fen}
 
     # Make the GET request
+    masters_url = "https://explorer.lichess.ovh/masters"
     response = requests.get(masters_url, params=params)
 
     # Check if the request was successful (status code 200)

@@ -2,7 +2,7 @@ import chess
 import chess.engine
 
 from api import get_position_info
-from options import ENGINE_NAME
+from constants import ENGINE_NAME
 
 
 def position_comment(node):
@@ -17,7 +17,7 @@ def position_comment(node):
             return None
     
 
-def position_name(node, write=False):
+def position_info(node, write=False):
     if "ECO: " in node.comment and "Name: " in node.comment:
         return node.comment.split("ECO: [")[1].split("]")[0], node.comment.split("Name: [")[1].split("]")[0]
     else:

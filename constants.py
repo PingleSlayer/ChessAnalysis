@@ -1,10 +1,5 @@
-# POSITION ANALYSIS
+ENGINE_NAME = "stockfish.exe"
 
-
-
-# MOVE ANALYSIS
-
-## Move Tags
 MOVE_TAG_BOUNDARIES = {
     "Winning": 0.5,  
     "Miss 1": -1.5,  
@@ -32,5 +27,11 @@ MOVE_TAG_BOUNDARIES = {
     "Disaster": -9,   
 }
 
-
-# GAME ANALYSIS
+PIECE_VALUES = {
+    "K": 0,
+    "Q": 9,
+    "R": 5,
+    "B": 3,
+    "N": 3,
+    "P": 1 
+}
