@@ -23,3 +23,5 @@ def game_analysis(pgn_string, engine_depth=None, engine_time=0.1):
         move_tag(node, write=True, engine_depth=engine_depth, engine_time=engine_time)
 
     return game
+
+

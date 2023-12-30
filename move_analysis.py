@@ -32,7 +32,11 @@ def move_info(node, write=False):
         captured_piece = node.comment.split("Capture: [")[1].split("]")[0]
     else:
         if node.parent.board().is_capture(node.move):
-            captured_piece = chess.piece_name(node.parent.board().piece_at(node.move.to_square).piece_type)
+            if node.parent.board().is_en_passant(node.move):
+                captured_piece = "pawn"  # En passant capture involves capturing a pawn
+            else:
+                captured_piece = chess.piece_name(node.parent.board().piece_at(node.move.to_square).piece_type)
+            
             if write:
                 if node.comment:
                     node.comment += f', Capture: [{f"{captured_piece}"}]'
