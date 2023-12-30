@@ -2,7 +2,7 @@ import requests
 import time
 
 
-def get_position_info(fen):
+def get_opening_info(fen):
     params = {"fen": fen}
 
     # Make the GET request
@@ -30,10 +30,33 @@ def get_position_info(fen):
     elif response.status_code == 429:
         print("Too many requests -> Waiting 1 minute")
         time.sleep(60)
-        return get_position_info(fen)
+        return get_opening_info(fen)
     else:
         # Print an error message if the request was not successful
         print(f"Error: {response.status_code}")
         print(response.text)
         return None
 
+
+def get_tablebase_result(fen):
+    params = {"fen": fen}
+
+    # Make the GET request
+    tablebase_url = "https://tablebase.lichess.ovh"
+    response = requests.get(tablebase_url, params=params)
+
+    # Check if the request was successful (status code 200)
+    if response.status_code == 200:
+        # Parse the JSON response
+        data = response.json()
+        result = data.get("category")
+        return result
+    elif response.status_code == 429:
+        print("Too many requests -> Waiting 1 minute")
+        time.sleep(60)
+        return get_tablebase_result(fen)
+    else:
+        # Print an error message if the request was not successful
+        print(f"Error: {response.status_code}")
+        print(response.text)
+        return None
