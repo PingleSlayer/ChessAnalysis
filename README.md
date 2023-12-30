@@ -15,7 +15,6 @@ We welcome contributions/suggestions from the community! If you'd like to contri
 (This is my first real GitHub project so if I am doing something wrong let me know!)
 
 ## To Do
-- Fix problem in move_analysis.py -> move_info() -> no piece at to_square?
 - Properly test existing code
 - Find easy to understand, useful move tags and accompanying boundary conditions
 - Use Lichess API for openings, endgame tablebase,...
