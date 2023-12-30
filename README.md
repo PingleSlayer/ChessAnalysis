@@ -25,4 +25,4 @@ We welcome contributions/suggestions from the community! If you'd like to contri
 ## Sources
 - Using stockfish as engine
 - Using python-chess library
-- Using openings from chess-openings reposotory
+- Using openings from chess-openings repository
