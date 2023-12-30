@@ -2,7 +2,7 @@ import chess
 import chess.engine
 
 from api import get_position_info
-from constants import ENGINE_NAME
+from options import ENGINE_PATH
 
 
 def position_comment(node):
@@ -41,8 +41,7 @@ def position_evaluation(node, write=False, engine_depth=None, engine_time=0.1):
     if "Eval: " in node.comment:
         return float(node.comment.split("Eval: [")[1].split("]")[0])
     else:
-        engine_path = f"Engine/{ENGINE_NAME}"
-        with chess.engine.SimpleEngine.popen_uci(engine_path) as engine:
+        with chess.engine.SimpleEngine.popen_uci(ENGINE_PATH) as engine:
             # Calculate and add position evaluation to the comment
             if engine_depth:
                 result = engine.analyse(node.board(), chess.engine.Limit(depth=engine_depth))
