@@ -24,4 +24,3 @@ def game_analysis(pgn_string, engine_depth=None, engine_time=0.1):
 
     return game
 
-

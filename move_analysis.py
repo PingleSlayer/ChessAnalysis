@@ -123,8 +123,8 @@ def move_tag(node, write=False, engine_depth=None, engine_time=0.1):
                 tag = "Decent"
         # Check for suboptimal winning move
         elif relative_eval >= MOVE_TAG_BOUNDARIES["Winning"]:
-            if new_move_score >= MOVE_TAG_BOUNDARIES["Safe"]:
-                tag = "Safe"
+            if new_move_score >= MOVE_TAG_BOUNDARIES["Okay"]:
+                tag = "Okay"
             elif new_move_score >= MOVE_TAG_BOUNDARIES["Suboptimal"]:
                 tag = "Suboptimal"
             elif new_move_score >= MOVE_TAG_BOUNDARIES["Inaccurate"]:
@@ -151,8 +151,8 @@ def move_tag(node, write=False, engine_depth=None, engine_time=0.1):
                 tag = "Blunder"
         # Check for losing move
         else:
-            if new_move_score >= MOVE_TAG_BOUNDARIES["Okay"]:
-                tag = "Okay"
+            if new_move_score >= MOVE_TAG_BOUNDARIES["Ok"]:
+                tag = "Ok"
             elif new_move_score >= MOVE_TAG_BOUNDARIES["Misstep"]:
                 tag = "Misstep"
             elif new_move_score >= MOVE_TAG_BOUNDARIES["Questionable"]:
