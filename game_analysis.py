@@ -15,9 +15,8 @@ class Game_Analyzer:
     def position_analysis(self, engine_time=0.1, computer_lines=None, mode=0):
         for node in self.game.mainline():
             pos_analyzer = Position_Analyzer(node)
-            pos_analyzer.opening_analysis()
-            pos_analyzer.engine_analysis(engine_time=engine_time, computer_lines=computer_lines)
-            pos_analyzer.advantage_analysis()
+            pos_analyzer.analysis(engine_time=engine_time, computer_lines=computer_lines, mode=mode)
+
             
 
 # Example PGN

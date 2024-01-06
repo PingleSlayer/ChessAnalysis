@@ -14,6 +14,21 @@ class Position_Analyzer:
         self.board = node.board()
         self.fen = self.board.fen()
 
+    def analysis(self, engine_time=0.1, computer_lines=None, mode=0):
+        self.opening_analysis()
+        self.engine_analysis(engine_time=engine_time, computer_lines=computer_lines)
+        self.advantage_analysis()
+        self.space_analysis()
+        self.development_analysis()
+        self.initiative_analysis()
+        self.material_analysis()
+        self.control_analysis()
+        self.kingsafety_analysis()
+        self.pawnstructure_analysis()
+        self.pieceplacement_analysis()
+        self.piececoordination_analysis()
+
+    # Add opening information
     def opening_analysis(self):
         opening_data = get_opening_data(self.fen)
         if opening_data:
@@ -24,11 +39,12 @@ class Position_Analyzer:
             black = opening_data[4]
 
             if eco and name:
-                self.node.comment += f'[%opening {eco},{name}]'
+                self.node.comment += f' [%opening {eco},{name}]'
 
             if white and draw and black:
-                self.node.comment += f'[%wdb {white},{draw},{black}]'
+                self.node.comment += f' [%wdb {white},{draw},{black}]'
 
+    # Add evaluation (+ engine lines)
     def engine_analysis(self, engine_time=0.1, computer_lines=None):
         with chess.engine.SimpleEngine.popen_uci(ENGINE_PATH) as engine:
             if computer_lines:
@@ -106,32 +122,33 @@ class Position_Analyzer:
         if pov_eval is None:
             return
         eval = pov_eval.white().score(mate_score=MATE_SCORE)/100
-        # Count squares controlled by each side
-        white_squares_controlled = len(self.board.attacks(chess.BB_ALL, chess.WHITE))
-        black_squares_controlled = len(self.board.attacks(chess.BB_ALL, chess.BLACK))
+
+        # Count squares attacked by each side using attackers
+        white_squares_attacked = 0
+        black_squares_attacked = 0
+
+        for square in chess.SQUARES:
+            white_squares_attacked += len(self.board.attackers(chess.WHITE, square)) * 0.1
+            black_squares_attacked += len(self.board.attackers(chess.BLACK, square)) * 0.1
 
         # Evaluate pawn advancement
-        white_pawn_advancement = sum([square.rank() for square in self.board.pieces(chess.PAWN, chess.WHITE)])
-        black_pawn_advancement = 7 - sum([square.rank() for square in self.board.pieces(chess.PAWN, chess.BLACK)])
-
-        # Adjust the values based on the number of attackers
-        white_squares_controlled *= 0.1  # Adjust weight as needed
-        black_squares_controlled *= 0.1  # Adjust weight as needed
-
+        white_pawn_advancement = sum([square//8 for square in self.board.pieces(chess.PAWN, chess.WHITE)])
+        black_pawn_advancement = 7 - sum([square//8 for square in self.board.pieces(chess.PAWN, chess.BLACK)])
+        
         # Calculate the final space advantage
-        space_advantage = white_squares_controlled + white_pawn_advancement - (black_squares_controlled + black_pawn_advancement)
+        space_advantage = white_squares_attacked + white_pawn_advancement - (black_squares_attacked + black_pawn_advancement)
 
-        if space_advantage > 1:
-            if eval > 3 and space_advantage > 3:
+        if space_advantage > 3:
+            if eval > 3 and space_advantage > 5:
                 self.node.nags.add(28)  # White has a decisive space advantage
-            elif eval > 0.25 and space_advantage > 3:
+            elif eval > 0.25 and space_advantage > 5:
                 self.node.nags.add(26)  # White has a moderate space advantage
             else:
                 self.node.nags.add(24)  # White has a slight space advantage
-        elif space_advantage < -1:
-            if eval < -3 and space_advantage < -3:
+        elif space_advantage < -3:
+            if eval < -3 and space_advantage < -5:
                 self.node.nags.add(29)  # Black has a decisive space advantage
-            elif eval < -0.25 and space_advantage < -3:
+            elif eval < -0.25 and space_advantage < -5:
                 self.node.nags.add(27)  # Black has a moderate space advantage
             else:
                 self.node.nags.add(25)  # Black has a slight space advantage
