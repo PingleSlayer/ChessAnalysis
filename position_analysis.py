@@ -133,7 +133,7 @@ class Position_Analyzer:
 
         # Evaluate pawn advancement
         white_pawn_advancement = sum([square//8 for square in self.board.pieces(chess.PAWN, chess.WHITE)])
-        black_pawn_advancement = 7 - sum([square//8 for square in self.board.pieces(chess.PAWN, chess.BLACK)])
+        black_pawn_advancement = sum([7 - square//8 for square in self.board.pieces(chess.PAWN, chess.BLACK)])
         
         # Calculate the final space advantage
         space_advantage = white_squares_attacked + white_pawn_advancement - (black_squares_attacked + black_pawn_advancement)
