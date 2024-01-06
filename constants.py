@@ -25,12 +25,24 @@ MOVE_TAG_BOUNDARIES = {
     "Disaster": -9,   
 }
 
-PIECE_VALUES = {
-    "K": 0,
-    "Q": 9,
-    "R": 5,
-    "B": 3,
-    "N": 3,
-    "P": 1 
+PIECE_NAMES = {
+    "K": "King",
+    "Q": "Queen",
+    "R": "Rook",
+    "B": "Bishop",
+    "N": "Knight",
+    "P": "Pawn" 
 }
+
+PIECE_VALUES = {
+    "King": 0,
+    "Queen": 9,
+    "Rook": 5,
+    "Bishop": 3,
+    "Knight": 3,
+    "Pawn": 1 
+}
+
+MATE_SCORE = 10000
+
 

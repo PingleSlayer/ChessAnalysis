@@ -1,120 +1,170 @@
 import chess
 import chess.engine
+import chess.pgn
 
-from api import get_opening_info, get_tablebase_result
+from helpfunctions import get_opening_data, get_tablebase_result
 from options import ENGINE_PATH
-from constants import PIECE_VALUES
+from constants import PIECE_VALUES, PIECE_NAMES, MATE_SCORE
 
 
-def count_pieces(fen):
-    # Extract the piece placement part of the FEN string
-    pieces_part = fen.split(' ')[0]
-    total_pieces = 0
+class Position_Analyzer:
 
-    # Iterate through each character in the pieces part
-    for char in pieces_part:
-        if char.isalpha():
-            # Increment the count for the piece type
-            total_pieces += 1
+    def __init__(self, node):
+        self.node = node
+        self.board = node.board()
+        self.fen = self.board.fen()
 
-    return total_pieces
+    def opening_analysis(self):
+        opening_data = get_opening_data(self.fen)
+        if opening_data:
+            eco = opening_data[0]
+            name = opening_data[1]
+            white = opening_data[2]
+            draw = opening_data[3]
+            black = opening_data[4]
 
+            if eco and name:
+                self.node.comment += f'[%opening {eco},{name}]'
 
-def count_material(fen):
-    # Extract the piece placement part of the FEN string
-    pieces_part = fen.split(' ')[0]
-    white_material = 0
-    black_material = 0
+            if white and draw and black:
+                self.node.comment += f'[%wdb {white},{draw},{black}]'
 
-    # Iterate through each character in the pieces part
-    for char in pieces_part:
-        if char.isalpha():
-            # Increment the count for the piece type
-            if char.isupper():
-                white_material += PIECE_VALUES[char]
+    def engine_analysis(self, engine_time=0.1, computer_lines=None):
+        with chess.engine.SimpleEngine.popen_uci(ENGINE_PATH) as engine:
+            if computer_lines:
+                result = engine.analyse(self.board, chess.engine.Limit(time=engine_time), multipv=computer_lines)
+                pov_scores = [info["score"] for info in result]
+                depths = [info["depth"] for info in result]
+                self.node.set_eval(pov_scores[0], depths[0])
+
+                # Add engine lines as variations
+                for i, variation_info in enumerate(result):
+                    if "pv" in variation_info:
+                        variation_moves = variation_info["pv"]
+                        var_node = self.node
+                        var_node = var_node.add_line(variation_moves, comment=f"Engineline ({i + 1}/{len(result)})")
+                        var_node.set_eval(variation_info['score'], variation_info['depth'])
             else:
-                black_material += PIECE_VALUES[char.upper()]
+                result = engine.analyse(self.board, chess.engine.Limit(time=engine_time))
+                pov_score = result["score"]
+                depth = result["depth"]
+                self.node.set_eval(pov_score, depth)
 
-    return white_material, black_material
+    # Add NAGs $10-$23
+    def advantage_analysis(self):
+        pov_eval = self.node.eval()
+        if pov_eval is None:
+            return
+        eval = pov_eval.white().score(mate_score=MATE_SCORE)/100
+        relative_eval = pov_eval.relative.score(mate_score=MATE_SCORE)/100
+        
+        if not self.board.is_check():
+            with chess.engine.SimpleEngine.popen_uci(ENGINE_PATH) as engine:
+                self.board.push(chess.Move.null())
+                null_board = self.board.copy(stack=False)
+                result = engine.analyse(null_board, chess.engine.Limit(time=0.1))
+                null_relative_eval = result["score"].relative.score(mate_score=MATE_SCORE)/100
+                self.board.pop()
+                zugzwang_score = -(null_relative_eval + relative_eval)
 
+            if zugzwang_score > 0:
+                if self.board.turn == chess.WHITE:
+                    self.node.nags.add(22) # White is in zugzwang
+                else:
+                    self.node.nags.add(23) # Black is in zugzwang
 
-def get_evaluation(board, engine_depth=None, engine_time=0.1):
-    with chess.engine.SimpleEngine.popen_uci(ENGINE_PATH) as engine:
-        # Calculate and add position evaluation to the comment
-        if engine_depth:
-            result = engine.analyse(board, chess.engine.Limit(depth=engine_depth))
+        if abs(eval) < 0.25:
+            self.node.nags.add(10) # Drawish position or even
+            if zugzwang_score < -5:
+                self.node.nags.add(12) # Equal chances, active position
+            else:
+                self.node.nags.add(11) # Equal chances, quiet position
+        elif abs(eval) < 1:
+            if eval > 0:
+                self.node.nags.add(14) # White has a slight advantage
+            else:
+                self.node.nags.add(15) # Black has a slight advantage
+        elif abs(eval) < 3:
+            if eval > 0:
+                self.node.nags.add(16) # White has a moderate advantage
+            else:
+                self.node.nags.add(17) # Black has a moderate advantage
+        elif abs(eval) < 9:
+            if eval > 0:
+                self.node.nags.add(18) # White has a decisive advantage
+            else:
+                self.node.nags.add(19) # Black has a decisive advantage
         else:
-            result = engine.analyse(board, chess.engine.Limit(time=engine_time))
-        eval_score = result["score"].relative.score(mate_score=10000) / 100
-        if board.turn == chess.BLACK:
-            eval_score = -eval_score
+            if eval > 0:
+                self.node.nags.add(20) # White has a crushing advantage (Black should resign)
+            else:
+                self.node.nags.add(21) # Black has a crushing advantage (White should resign)
 
-    return eval_score
+    # Add NAGs $24-$29
+    def space_analysis(self):
+        pov_eval = self.node.eval()
+        if pov_eval is None:
+            return
+        eval = pov_eval.white().score(mate_score=MATE_SCORE)/100
+        # Count squares controlled by each side
+        white_squares_controlled = len(self.board.attacks(chess.BB_ALL, chess.WHITE))
+        black_squares_controlled = len(self.board.attacks(chess.BB_ALL, chess.BLACK))
 
+        # Evaluate pawn advancement
+        white_pawn_advancement = sum([square.rank() for square in self.board.pieces(chess.PAWN, chess.WHITE)])
+        black_pawn_advancement = 7 - sum([square.rank() for square in self.board.pieces(chess.PAWN, chess.BLACK)])
 
-def position_comment(node):
-    if "Comment: " in node.comment:
-        return node.comment.split("Comment: [")[1].split("]")[0]
-    else:
-        if node.comment:
-            comment = node.comment
-            node.comment = f"Comment: [{comment}]"
-            return comment
-        else:
-            return None
+        # Adjust the values based on the number of attackers
+        white_squares_controlled *= 0.1  # Adjust weight as needed
+        black_squares_controlled *= 0.1  # Adjust weight as needed
+
+        # Calculate the final space advantage
+        space_advantage = white_squares_controlled + white_pawn_advancement - (black_squares_controlled + black_pawn_advancement)
+
+        if space_advantage > 1:
+            if eval > 3 and space_advantage > 3:
+                self.node.nags.add(28)  # White has a decisive space advantage
+            elif eval > 0.25 and space_advantage > 3:
+                self.node.nags.add(26)  # White has a moderate space advantage
+            else:
+                self.node.nags.add(24)  # White has a slight space advantage
+        elif space_advantage < -1:
+            if eval < -3 and space_advantage < -3:
+                self.node.nags.add(29)  # Black has a decisive space advantage
+            elif eval < -0.25 and space_advantage < -3:
+                self.node.nags.add(27)  # Black has a moderate space advantage
+            else:
+                self.node.nags.add(25)  # Black has a slight space advantage
+
+    # Add NAGs $30-$35
+    def development_analysis(self):
+        pass
+
+    # Add NAGs $36-$41
+    def initiative_analysis(self):
+        pass
     
+    # Add NAGs $42-$47
+    def material_analysis(self):
+        pass
 
-def position_info(node, write=False):
-    if "ECO: " in node.comment and "Name: " in node.comment:
-        return node.comment.split("ECO: [")[1].split("]")[0], node.comment.split("Name: [")[1].split("]")[0]
-    else:
-        result = get_opening_info(node.board().fen())
-        if result == None:
-            return None
-        else:
-            eco, opening, _, _, _ = result
+    # Add NAGs $48-$65    
+    def control_analysis(self):
+        pass
+    
+    # Add NAGs $66-$77
+    def kingsafety_analysis(self):
+        pass
 
-        # Add opening to the comment of the node
-        if write:
-            if node.comment:
-                node.comment += f', ECO: [{eco}], Name: [{opening}]'
-            else:
-                node.comment = f'ECO: [{eco}], Name: [{opening}]'     
+    # Add NAGs $78-$85
+    def pawnstructure_analysis(self):
+        pass
 
-        return eco, opening
+    # Add NAGs $86-$101
+    def pieceplacement_analysis(self):
+        pass
 
-
-def position_evaluation(node, write=False, engine_depth=None, engine_time=0.1):
-    if "Eval: " in node.comment:
-        return float(node.comment.split("Eval: [")[1].split("]")[0])
-    else:
-        if count_pieces(node.board().fen()) <= 7:
-            result = get_tablebase_result(node.board().fen())
-            if result == "win":
-                if node.board().turn == chess.WHITE:
-                    eval_score = 100
-                else:
-                    eval_score = -100
-            elif result == "draw" or result == "cursed-win" or result == "blessed-loss":
-                eval_score = 0
-            elif result == "loss":
-                if node.board().turn == chess.WHITE:
-                    eval_score = -100
-                else:
-                    eval_score = 100
-            else:
-                eval_score = get_evaluation(node.board(), engine_depth=engine_depth, engine_time=engine_time)
-        else:
-            eval_score = get_evaluation(node.board(), engine_depth=engine_depth, engine_time=engine_time)    
-        eval_str = f"{float(eval_score):.2f}"
-
-        # Add eval to the comment for the node
-        if write:
-            if node.comment:
-                node.comment += f', Eval: [{eval_str}]'
-            else:
-                node.comment = f'Eval: [{eval_str}]'
-
-        return eval_score
-
+    # Add NAGs $102-$105
+    def piececoordination_analysis(self):
+        pass
 

@@ -2,77 +2,65 @@ from io import StringIO
 import chess
 import chess.pgn
 
-from position_analysis import position_comment, position_name, position_evaluation
-from move_analysis import move_score, move_info, move_tag
+from position_analysis import Position_Analyzer
+from move_analysis import Move_Analyzer
+
+class Game_Analyzer:
+
+    def __init__(self, pgn):
+        # Load the PGN
+        self.pgn = pgn
+        self.game = chess.pgn.read_game(StringIO(pgn))
+
+    def position_analysis(self, engine_time=0.1, computer_lines=None, mode=0):
+        for node in self.game.mainline():
+            pos_analyzer = Position_Analyzer(node)
+            pos_analyzer.opening_analysis()
+            pos_analyzer.engine_analysis(engine_time=engine_time, computer_lines=computer_lines)
+            pos_analyzer.advantage_analysis()
+            
+
+# Example PGN
+example_pgn = """
+[Event "Copenhagen"]
+[Site "Copenhagen DEN"]
+[Date "1923.03.09"]
+[EventDate "1923.03.03"]
+[Round "6"]
+[Result "0-1"]
+[White "Friedrich Saemisch"]
+[Black "Aron Nimzowitsch"]
+[ECO "E18"]
+[WhiteElo "?"]
+[BlackElo "?"]
+[PlyCount "50"]
+
+1. d4 {Notes by Nimzowitsch's "My System"} Nf6 2. c4 e6 3. Nf3
+b6 4. g3 Bb7 5. Bg2 Be7 6. Nc3 O-O 7. O-O d5 8. Ne5 c6
+{Safeguards the position} 9. cxd5 cxd5 10. Bf4 a6 {Protects
+the oupost station c4, i.e., by ...a6 and ...b5.} 11. Rc1 b5
+12. Qb3 Nc6 {The ghost! With noiseless steps he presses on
+towards c4.} 13. Nxc6 {Samisch sacrifices two tempi (exchange
+of the tempo-eating Knight on e5 for the Knight which is
+almost undeveloped) merely to be rid of the ghost.} Bxc6
+14. h3 Qd7 15. Kh2 Nh5 {I could have supplied him with as yet
+a second ghost by ...Qb7 and ...Knight-d7-b6-c4, but I wished
+to turn my attention to the King's side.} 16. Bd2 f5 {!}
+17. Qd1 b4 {!} 18. Nb1 Bb5 19. Rg1 Bd6 20. e4 fxe4 {! This
+sacrifice, which has a quite surprising affect, is based upon
+the following sober calculation: two Pawns and the 7th rank
+and an enemy Queen's wing which cannot be disentangled - all
+this for only one piece!} 21. Qxh5 Rxf2 22. Qg5 Raf8 23. Kh1
+R8f5 24. Qe3 Bd3 25. Rce1 h6 {!! A brilliant move which
+announces the Zugzwang. White has not a move left. If, e.g.,
+Kh2 or g4, then R5f3. Black can now make waiting moves with
+his King, and White must, willy-nilly, eventually throw
+himself upon the sword.} 0-1
+"""
 
 
-def game_accuracy(game, write=False, engine_depth=None, engine_time=0.1):
-    total_white_move_score = 0
-    total_white_moves = 0
-    total_black_move_score = 0
-    total_black_moves = 0
-    
-    og_comments = []
-    # Iterate through the moves in the game to calculate average move score
-    for node in game.mainline():
-        if not write:
-            og_comments.append(node.comment)
-        if node.board().turn == chess.BLACK:
-            total_white_move_score += move_score(node, write=True, engine_depth=engine_depth, engine_time=engine_time)
-            total_white_moves += 1
-        else:
-            total_black_move_score += move_score(node, write=True, engine_depth=engine_depth, engine_time=engine_time)
-            total_black_moves += 1
+analyzer = Game_Analyzer(example_pgn)
+analyzer.position_analysis(engine_time=0.1, computer_lines=2)
 
-    avg_white_move_score = total_white_move_score / total_white_moves
-    avg_black_move_score = total_black_move_score / total_black_moves
-
-    total_white_deviation = 0
-    total_black_deviation = 0
-    # Iterate through the moves in the game to calculate standard deviation
-    for node in game.mainline():
-        if node.board().turn == chess.BLACK:
-            total_white_deviation += pow((move_score(node, write=True, engine_depth=engine_depth, engine_time=engine_time) - avg_white_move_score),2)
-        else:
-            total_black_deviation += pow((move_score(node, write=True, engine_depth=engine_depth, engine_time=engine_time) - avg_black_move_score),2)
-
-    stdev_white_move_score = total_white_deviation / total_white_moves
-    stdev_black_move_score = total_black_deviation / total_black_moves
-
-    # Delete from pgn        
-    if not write:
-        for i, node in enumerate(game.mainline()):
-            node.comment = og_comments[i]
-
-    return avg_white_move_score, stdev_white_move_score, avg_black_move_score, stdev_black_move_score
-
-
-def game_analysis(pgn_string, write=False, engine_depth=None, engine_time=0.1):
-    # Load the PGN
-    game = chess.pgn.read_game(StringIO(pgn_string))
-    og_comments = []
-    # Iterate through the moves in the game
-    for node in game.mainline():
-        if not write:
-            og_comments.append(node.comment)
-        # Add position information to the game object
-        position_comment(node)
-        print(position_name(node, write=True))
-        position_evaluation(node, write=True, engine_depth=engine_depth, engine_time=engine_time)
-
-        # Add move information to the game object
-        move_info(node, write=True)
-        move_score(node, write=True, engine_depth=engine_depth, engine_time=engine_time)
-        move_tag(node, write=True, engine_depth=engine_depth, engine_time=engine_time)
-
-    avg_white_move_score, stdev_white_move_score, avg_black_move_score, stdev_black_move_score = game_accuracy(game, write=True)
-
-    print(f"White -> avg move score: {avg_white_move_score}, stdev: {stdev_white_move_score}\n")
-    print(f"Black -> avg move score: {avg_black_move_score}, stdev: {stdev_black_move_score}\n")
-    
-    # Delete from pgn
-    if not write:
-        for i, node in enumerate(game.mainline()):
-            node.comment = og_comments[i]
-
-    return game
+# Print the updated PGN with variations and comments
+print(analyzer.game, end="")
